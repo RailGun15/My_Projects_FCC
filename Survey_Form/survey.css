@@ -9,7 +9,7 @@
 
 body {
     font-family: "Roboto","Helvetica Neue","Helvetica","Arial",sans-serif;
-    background-image: url("./renaper_background.png");
+    background-image: linear-gradient(lightblue, white);
     background-repeat: no-repeat;
     background-size: 100%;
     
