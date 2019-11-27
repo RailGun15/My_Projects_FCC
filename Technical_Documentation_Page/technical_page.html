@@ -1,0 +1,409 @@
+<html>
+    <main id="main-doc">
+    
+        <head>
+        <link rel="stylesheet" type="text/css" href="./technical.css">
+        <link href="https://fonts.googleapis.com/css?family=Overpass&display=swap" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css?family=Roboto&display=swap" rel="stylesheet">
+        </head>
+
+            <body>
+                <div class="container">
+                    <nav id="navbar">
+                        <header><u>Ruby Documentation</u></header>
+                        <ul>
+                            <li><a class="nav-link" href="#Introduction">Introduction</a></li>
+                            <li><a class="nav-link" href="#Variables,_constants,_and_arguments">Variables, constants, and arguments</a></li>
+                            <li><a class="nav-link" href="#Iterators">Iterators</a></li>
+                            <li><a class="nav-link" href="#Syntax">Syntax</a></li>
+                            <li><a class="nav-link" href="#Methods">Methods</a></li>
+                            <li><a class="nav-link" href="#Classes_and_modules">Classes and modules</a></li>
+                        </ul>
+                    </nav>
+                        <main id="main-doc">
+                            <section id="Introduction" class="main-section">
+                                <header>Introduction</header>
+                                <p>Ruby is a simple and powerful object-oriented programming language, created by Yukihiro Matsumoto (who goes by the
+                                handle “Matz” in this document and on the mailing lists).</p>
+                                <p>Like Perl, Ruby is good at text processing. Like Smalltalk, everything in Ruby is an object, and Ruby has blocks,
+                                iterators, meta-classes and other good stuff.</p>
+                                <p>You can use Ruby to write servers, experiment with prototypes, and for everyday programming tasks. As a fully-integrated
+                                object-oriented language, Ruby scales well.</p>
+                                <p>Ruby features:</p>
+                                <ul>
+                                    <li>Simple syntax</li>
+                                    <li>Basic OO features (classes, methods, objects, and so on)</li>
+                                    <li>Special OO features (mixins, singleton methods, renaming, and so on)</li>
+                                    <li>Operator overloading</li>
+                                    <li>Exception handling</li>
+                                    <li>Iterators and closures</li>
+                                    <li>Garbage collection</li>
+                                    <li>Dynamic loading (depending on the architecture)</li>
+                                    <li>High transportability (runs on various Unices, Windows, DOS, macOS, OS/2, Amiga, and so on)</li>
+                                </ul>
+                                <h4>Show me some Ruby code!</h4>
+                                <p>Let’s define a class called <code>Person</code>, with a name and an age. We’ll test our code by creating a few people and examining
+                                them.</p>
+                                <code class="block">
+class Person 
+  attr_accessor :name, :age 
+ def initialize(name, age)
+  @name = name 
+  @age = age.to_i 
+ end 
+ def inspect 
+ "#{name} (#{age})" 
+ end 
+end 
+p1 = Person.new("Elmo", 4) 
+p2 = Person.new("Zoe", 7) 
+p1 # => Elmo (4) 
+p2 # => Zoe (7)
+                                </code>
+                                <p>Now let’s populate an array of people by reading their names and ages from a file ages containing lines like:</p>
+                                <code class="block">
+Bert: 8 
+Cookie: 11 
+Elmo: 4 
+Ernie: 8 
+Zoe: 7
+                                </code>
+                                <p>The code uses regular expressions to parse successive lines from the input file, creating a new <code>Person</code> object for each
+                                match and pushing it onto the end of the array <code>people</code>.</p>
+                                <code class="block">
+people = Array.new 
+File.foreach("ages") do |line| 
+  people << Person.new($1, $2) if line=~ /(.*):\s+(\d+)/ 
+end 
+people #=> [Bert (8), Cookie (11), Elmo (4), Ernie (8), Zoe (7)]   
+                                </code>
+                                <p>Now, let’s sort the result based on the person’s age. There are many ways to do this. We can define a sort block, which
+                                tells Ruby how to do the comparison of two people:</p>
+                                <code class="block">
+sorted = people.sort {|a, b| a.age <=> b.age } 
+sorted # => [Elmo (4), Zoe (7), Bert (8), Ernie (8), Cookie (11)]  
+                                </code>
+                                <p>Another way would be to change the comparison method for class <code>Person</code>:</p>
+                                <code class="block">
+class Person 
+    def <=>(other) 
+        age <=> other.age 
+    end 
+end 
+people.sort # => [Elmo (4), Zoe (7), Bert (8), Ernie (8), Cookie (11)]  
+                            </code>
+                            </section>
+                            <section id="Variables,_constants,_and_arguments" class="main-section">
+                                <header>Variables, constants, and arguments</header>
+                                <h4>Does assignment generate a new copy of an object?</h4>
+                                <p>All variables and constants reference (point at) some object. (With the exception of uninitialized local variables,
+                                which reference nothing. These raise a <code>NameError</code>exception if used). When you assign to a variable, or initialize a constant, you set the object that the variable or
+                                constant references.</p>
+                                <p>Assignment on its own therefore never creates a new copy of an object.</p>
+                                <p>There’s a slightly deeper explanation in certain special cases. Instances of <code>Fixnum</code>,<code>NilClass</code>,<code>TrueClass</code>, and <code>FalseClass</code>
+                                are contained directly in variables or constants—there is no reference involved. A variable holding the number <code>42</code>or the constant<code>true</code>actually holds the value, and not a reference to it. Assignment therefore physically produces a copy of objects of these
+                                types.</p>
+                            <h4>What is the scope of a local variable?</h4>
+                            <p>A new scope for a local variable is introduced in (1) the toplevel (main), (2) a class (or module) definition, or (3) a
+                            method definition.</p>
+                            <code class="block">
+var = 1 # (1) 
+class Demo 
+    var = 2 # (2) 
+    def method 
+        var = 3 # (3) 
+        puts "in method: var = #{var}" 
+    end 
+    puts "in class: var = #{var}" 
+end 
+puts "at top level: var = #{var}" 
+Demo.new.method
+                            </code>
+                            <p>Produces:</p>
+                            <code class="block">
+in class: var = 2 
+at top level: var = 1 
+in method: var = 3
+                            </code>
+                            <p>(Note that the class definition is executable code: the trace message it contains is written as the class is defined).</p>
+                            <p>A block (<code>{ ... }</code> or <code>do ... end</code>) almost introduces a new scope ;-) Local variables created within a block are not
+                            accessible outside the block. However, if a local variable within the block has the same name as an existing local
+                            variable in the caller’s scope, then no new local variable is created, and you can subsequently access that variable
+                            outside the block.</p>
+                            <code class="block">
+a = 0 
+1.upto(3) do |i| 
+    a += i 
+    b = i*i 
+end 
+a # => 6 
+# b is not defined here
+                            </code>
+                            <p>This becomes significant when you use threading—each thread receives its own copy of the variables local to the thread’s
+                            block:</p>
+                            <code class="block">
+threads = [] 
+["one", "two"].each do |name|
+    threads << Thread.new do 
+        local_name=name 
+        a=0 
+        3.times do |i| 
+            Thread.pass 
+            a +=i 
+            puts "#{local_name}: #{a}" 
+        end 
+    end 
+end 
+threads.each {|t| t.join }
+                            </code>
+                            <p>Might produce (in case the scheduler switches threads as hinted by <code>Thread.pass</code>; this depends on OS and processor):</p>
+                            <code class="block">
+one: 0
+two: 0
+one: 1
+two: 1
+one: 3
+two: 3
+                            </code>
+                            <p><code>while</code>, <code>until</code>, and <code>for</code> are control structures, not blocks, so local variables within them will be accessible in the
+                            enclosing environment. <code>loop</code>, however, is a method and the associated block introduces a new scope.</p>
+                            </section>
+
+                            <section id="Iterators" class="main-section">
+                                <header>Iterators</header>
+                                <p>An iterator is a method which accepts a block or a <code>Proc</code> object. In the source file, the block is placed immediately
+                                after the invocation of the method. Iterators are used to produce user-defined control structures—especially loops.
+                                Let’s look at an example to see how this works. Iterators are often used to repeat the same action on each element of a
+                                collection, like this:</p>
+                                <p>Let’s look at an example to see how this works. Iterators are often used to repeat the same action on each element of a
+                                collection, like this:</p>
+                                <code class="block">
+data = [1, 2, 3] 
+data.each do |i| 
+    puts i 
+end
+                                </code>
+                                <p>Produces:</p>
+                                <code class="block">
+1 
+2 
+3
+                                </code>
+                                <p>This code has the same meaning as the last example. However, in some cases, precedence issues cause <code>do ... end</code> and <code>{ ... }</code> to act differently.</p>
+                                <code class="block">
+foobar a, b do ... end # foobar is the iterator. 
+foobar a, b { ... } # b is the iterator.
+                                </code>
+                                <p>This is because <code>{ ... }</code> binds more tightly to the preceding expression than does a <code>do ... end</code> block. The first example
+                                is equivalent to <code>foobar(a, b) do ... end</code>, while the second is <code>foobar(a, b { ... })</code>.</p>
+                                <h4>How can I pass a block to an iterator?</h4>
+                                <p>You simply place the block after the iterator call. You can also pass a <code>Proc</code> object by prepending <code>&</code> to the variable or
+                                constant name that refers to the <code>Proc</code>.</p>
+                            </section>
+
+                            <section id="Syntax" class="main-section">
+                                <header>Syntax</header>
+                                <h4>What is the difference between an immediate value and a reference?</h4>
+                                <p><code>Fixnum</code>, <code>true</code>, <code>nil</code>, and <code>false</code> are implemented as immediate values. With immediate values, variables hold the objects
+                                themselves, rather than references to them.</p>
+                                <p>Singleton methods cannot be defined for such objects. Two <code>Fixnum</code> of the same value always represent the same object
+                                instance, so (for example) instance variables for the <code>Fixnum</code> with the value <code>1</code> are shared between all the <code>1</code>’s in the
+                                system. This makes it impossible to define a singleton method for just one of these.</p>
+                                <h4>What is the difference between nil and false?</h4>
+                                <p>First the similarity: <code>nil</code> and <code>false</code> are the only two objects that evaluate to <code>false</code> in a boolean context. (In other
+                                words: they are the only “falsy” values, all other objects are “truthy”.)</p>
+                                <p>However, <code>nil</code> and <code>true</code> are instances of different classes (<code>NilClass</code> and <code>FalseClass</code>), and have different behavior
+                                elsewhere.</p>
+                                <p>We recommend that predicate methods (those whose name ends with a question mark) return <code>true</code> or <code>false</code>. Other methods
+                                that need to indicate failure should return <code>nil</code>.</p>
+                                <h4>Why is an empty string not false?</h4>
+                                <p>Q: An empty string (<code>""</code>) returns <code>true</code> in a conditional expression! In Perl, it’s <code>false</code>.
+                                A: But Ruby is not Perl ;-). It’s very simple: in Ruby, only <code>nil</code> and <code>false</code> are false in conditional contexts.
+                                You can use <code>empty?</code>, compare the string to <code>""</code>, or compare the string’s <code>size</code> or <code>length</code> to <code>0</code> to find out if a string is
+                                empty.</p>
+                                <h4>What does :name mean?</h4>
+                                <p>A colon followed by a name generates a Symbol object which corresponds one to one with the identifier. During the
+                                duration of a program’s execution the same Symbol object will be created for a given name or string. Symbols can also be
+                                created with <code>"name".intern</code> or <code>"name".to_sym</code>.</p>
+                                <p>Symbol objects can represent identifiers for methods, variables, and so on. Some methods, like <code>define_method</code>,
+                                <code>method_missing</code>, or <code>trace_var</code>, require a symbol. Other methods, e.g. <code>attr_accessor</code>, <code>send</code>, or <code>autoload</code>, also accept a
+                                string.</p>
+                                <p>Due to the fact that they are created only once, Symbols are often used as hash keys. String hash keys would create a
+                                new object for every single use, thereby causing some memory overhead. There is even a special syntax for symbol hash
+                                keys:</p>
+                                <code class="block">
+person_1 = { :name => "John", :age => 42 } 
+person_2 = { name: "Jane", age: 24 } # alternate syntax
+                                </code>
+                                <p>Symbols can also be used as enumeration values or to assign unique values to constants:</p>
+                                <code class="block">
+status = :open # :closed, ... 
+NORTH = :NORTH 
+SOUTH = :SOUTH
+                            </code>
+                            </section>
+                            <section id="Methods" class="main-section">
+                                <header>Methods</header>
+                                <h4>How does Ruby choose which method to invoke?</h4>
+                                <p>Ruby binds all messages to methods dynamically. It searches first for singleton methods in the receiver, then for
+                                methods defined in the receiver’s own class, and finally for methods defined in the receiver’s superclasses (including
+                                any modules which may have been mixed in). You can see the order of searching by displaying <code>ClassName.ancestors</code>, which
+                                shows the ancestor classes and modules of <code>ClassName</code>.</p>
+                                <p>If after searching the alternatives a matching method could not be found, Ruby tries to invoke a method called
+                                <code>method_missing</code>, repeating the same search procedure to find it. This allows you to handle messages to unknown methods,
+                                and is often used to provide dynamic interfaces to classes.</p>
+                                <code class="block">
+module Emphasizable 
+    def emphasize 
+        "**#{self}**" 
+    end 
+end 
+class String 
+    include Emphasizable 
+end
+String.ancestors
+    # => [String, Emphasizable, Comparable, Object, Kernel, 
+    BasicObject] 
+
+"Wow!".emphasize # => "**Wow!**"
+                                </code>
+                                <p>When the method <code>emphasize</code> is searched for, it is not found in class <code>String</code>, so Ruby searches next in the module
+                                <code>Emphasizable</code>.</p>
+                                <p>In order to override a method that already exists in the receiver’s class, e.g. <code>String#capitalize</code>, you need to insert
+                                the module into the ancestor chain in front of that class, by using <code>prepend</code>:</p>
+                                <code class="block">
+module PrettyCapitalize 
+    def capitalize 
+        "**#{super}**" 
+    end 
+end 
+class String 
+    prepend PrettyCapitalize 
+end 
+String.ancestors
+    # => [PrettyCapitalize, String, Comparable, Object, Kernel, 
+    BasicObject] 
+
+"hello".capitalize # => "**Hello**"
+                                </code>
+                            </section>
+
+                            <section id="Classes_and_modules" class="main-section">
+                                <header>Classes and modules</header>
+                                <h4>Can a class definition be repeated?</h4>
+                                <p>A class can be defined repeatedly. Each definition is added to the last definition. If a method is redefined, the former
+                                one is overridden and lost.</p>
+                                <h4>What is a class instance variable?Are there class variables?</h4>
+                                <p>There are. A variable prefixed with two at signs <code>(@@)</code> (@@) is a class variable, accessible within both instance and class
+                                methods of the class.</p>
+                                <code class="block">
+class Entity 
+
+    @@instances = 0 
+    
+    def initialize 
+        @@instances += 1 
+        @number = @@instances 
+    end 
+
+    def who_am_i
+     "I'm #{@number} of #{@@instances}"    
+    end 
+
+    def self.total 
+        @@instances 
+    end 
+end 
+entities = Array.new(9) { Entity.new } 
+
+entities[6].who_am_i # => "I'm 7 of 9" 
+Entity.total # => 9
+                                </code>
+                                <p>However, you probably should use class instance variables instead.</p>
+                                <h4>What is a class instance variable?</h4>
+                                <p>Here the example of the previous section rewritten using a class instance variable:</p>
+                                <code class="block">
+class Entity 
+
+    @instances = 0 
+    
+    class << self 
+        attr_accessor :instances # provide class methods for 
+        reading/writing 
+    end 
+    def initialize 
+        self.class.instances +=1 
+        @number=self.class.instances 
+    end 
+    def who_am_i 
+        "I'm #{@number} of #{self.class.instances}"
+    end 
+    def self.total 
+        @instances 
+    end 
+end 
+entities=Array.new(9) { Entity.new } 
+entities[6].who_am_i #=> "I'm 7 of 9" 
+Entity.instances # => 9 
+Entity.total # => 9
+                                </code>
+                                <p>Here, <code>@instances</code> is a class instance variable. It does not belong to an instance of class <code>Entity</code>, but to the class
+                                object <code>Entity</code>, which is an instance of class <code>Class</code>.
+                                Class instance variables are directly accessible only within class methods of the class.</p>
+                                <h4>What is the difference between class variables and class instance variables?</h4>
+                                <p>The main difference is the behavior concerning inheritance: class variables are shared between a class and all its
+                                subclasses, while class instance variables only belong to one specific class.</p>
+                                <p>Class variables in some way can be seen as global variables within the context of an inheritance hierarchy, with all the
+                                problems that come with global variables. For instance, a class variable might (accidentally) be reassigned by any of
+                                its subclasses, affecting all other classes:</p>
+                                <code class="block">
+class Woof 
+
+    @@sound = "woof" 
+    
+    def self.sound 
+        @@sound 
+    end 
+
+end 
+Woof.sound # => "woof" 
+
+class LoudWoof < Woof 
+    @@sound="WOOF" 
+end 
+
+LoudWoof.sound #=> "WOOF" 
+Woof.sound # => "WOOF" (!)
+                                </code>
+                                <p>Or, an ancestor class might later be reopened and changed, with possibly surprising effects:</p>
+                                <code class="block">
+class Foo 
+
+    @@var = "foo" 
+    
+    def self.var 
+        @@var 
+    end 
+    
+end 
+Foo.var # => "foo" (as expected) 
+
+class Object 
+    @@var = "object" 
+end 
+Foo.var # => "object" (!)
+                                </code>
+                                <p>So, unless you exactly know what you are doing and explicitly need this kind of behavior, you better should use class
+                                instance variables.</p>
+                            </section>
+                            <header><u>Reference</u></header>
+                            
+                            <p>All the documentation in this page is taken from <a href="https://www.ruby-lang.org/en/documentation/faq/1/">The Official Ruby FAQ</a></p>
+                        </main>
+                    </div>
+            </body>
+
+    </main>
+
+
+</html>
